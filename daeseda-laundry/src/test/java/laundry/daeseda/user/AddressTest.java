@@ -1,35 +1,19 @@
 package laundry.daeseda.user;
 
-import laundry.daeseda.dto.address.AddressDto;
 import laundry.daeseda.entity.user.AddressEntity;
 import laundry.daeseda.entity.user.UserEntity;
 import laundry.daeseda.perf.CompareTimer;
 import laundry.daeseda.repository.user.AddressRepository;
 import laundry.daeseda.repository.user.UserRepository;
-import laundry.daeseda.service.user.AddressService;
 import laundry.daeseda.service.user.AddressServiceImpl;
 import laundry.daeseda.service.user.UserService;
 import laundry.daeseda.util.SecurityUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.LongStream;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 @SpringBootTest
 public class AddressTest {
