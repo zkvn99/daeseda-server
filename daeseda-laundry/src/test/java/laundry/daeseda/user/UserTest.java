@@ -63,12 +63,4 @@ public class UserTest {
                 .forEach(i -> userRepository.deleteById(i));
     }
 
-    @Test
-    public void findAllUserDto() {
-        List<UserDto> userDtos = userService.getUserList();
-        for(UserDto userDto : userDtos) {
-            System.out.println(userDto.getUserEmail());
-            System.out.println(userDto.getUserName());
-        }
-    }
 }

@@ -51,7 +51,15 @@ public class OrderController {
     @GetMapping("/list")
     @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<List<OrderAllDto>> myOrderList() {
-        return ResponseEntity.ok(orderService.getUserOrderList());
+        long startTime = System.nanoTime(); // 작업 시작 시간 기록
+
+        List<OrderAllDto> orderAllDtoList = orderService.getUserOrderList();
+
+        long endTime = System.nanoTime(); // 작업 종료 시간 기록
+        double elapsedTime = (endTime - startTime) / 1000000.0; // 밀리초로 변환
+
+        System.out.println("총 소요 시간: " + elapsedTime + " ms");
+        return ResponseEntity.ok(orderAllDtoList);
     }
 
     @ApiOperation(value = "pay order", notes = "주문 결제 상태로 변경")

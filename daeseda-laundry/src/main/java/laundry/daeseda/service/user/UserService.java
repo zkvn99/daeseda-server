@@ -1,6 +1,8 @@
 package laundry.daeseda.service.user;
 
 import laundry.daeseda.dto.address.AddressDto;
+import laundry.daeseda.dto.page.PageRequestDto;
+import laundry.daeseda.dto.page.PageResultDto;
 import laundry.daeseda.dto.user.EmailDto;
 import laundry.daeseda.dto.user.TokenDto;
 import laundry.daeseda.dto.user.UserDto;
@@ -19,7 +21,7 @@ public interface UserService {
     int update(UserUpdateDto userDto);
     UserEntity getUserEntity();
 
-    List<UserDto> getUserList();
+    PageResultDto<UserDto, Object[]> getUserList(PageRequestDto pageRequestDto);
 
     default UserEntity dtoToEntity(UserDto userDto){
         UserEntity entity = UserEntity.builder()

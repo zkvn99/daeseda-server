@@ -2,12 +2,16 @@ package laundry.daeseda.controller;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import laundry.daeseda.dto.page.PageRequestDto;
+import laundry.daeseda.dto.page.PageResultDto;
 import laundry.daeseda.dto.user.EmailConfirmDto;
 import laundry.daeseda.dto.user.EmailDto;
 import laundry.daeseda.dto.user.UserDto;
 import laundry.daeseda.dto.user.UserUpdateDto;
+import laundry.daeseda.entity.user.UserEntity;
 import laundry.daeseda.service.mail.MailService;
 import laundry.daeseda.service.user.UserService;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -24,8 +28,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    String message = "ok";
-
     private final UserService userService;
     private final MailService mailService;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -47,7 +49,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<String> signupUser(@RequestBody @Valid UserDto userDto) { //register 호출
         userService.signup(userDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(message);
+        return ResponseEntity.status(HttpStatus.CREATED).body("ok");
     }
     // HttpStatus.CREATED (201), HttpStatus.OK (200) - Post 요청
 
@@ -56,14 +58,23 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<String> logout() {
         userService.signout();
-        return ResponseEntity.status(HttpStatus.CREATED).body(message);
+        return ResponseEntity.status(HttpStatus.CREATED).body("ok");
     }
 
     @ApiOperation(value = "get user-info", notes = "회원 정보 불러오기")
     @GetMapping("/myInfo")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<UserDto> getMyUserInfo() {
-        return ResponseEntity.ok(userService.getMyUserWithAuthorities());
+        long startTime = System.nanoTime();
+
+        UserDto userDto = userService.getMyUserWithAuthorities();
+
+        long endTime = System.nanoTime(); // 작업 종료 시간 기록
+        double elapsedTime = (endTime - startTime) / 1000000.0; // 밀리초로 변환
+
+        System.out.println("총 소요 시간: " + elapsedTime + " ms");
+
+        return ResponseEntity.ok(userDto);
     }
     // HttpStatus.OK (200) - Get 요청
 
@@ -148,5 +159,29 @@ public class UserController {
             }
         }
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("잘못된 형식입니다.");
+    }
+
+    @ApiOperation(value = "get uesr-list", notes = "회원 조회")
+    @ResponseBody
+    @GetMapping("/list")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER','ROLE_ADMIN')")
+    public ResponseEntity<PageResultDto<UserDto, Object[]>> getUserList
+            (@RequestParam(value = "page", required = false, defaultValue = "1") int page,
+             @RequestParam(value = "perPage", required = false, defaultValue = "10") int perPage,
+             @RequestParam(value = "perPagination", required = false, defaultValue = "5") int perPagination,
+             @RequestParam(value = "type", required = false, defaultValue = "n") String type,
+             @RequestParam(value = "keyword", required = false, defaultValue = "@") String keyword) {
+
+        PageRequestDto pageRequestDto = PageRequestDto.builder()
+                .page(page)
+                .perPage(perPage)
+                .perPagination(perPagination)
+                .type(type)
+                .keyword(keyword)
+                .build();
+
+        PageResultDto<UserDto, Object[]> resultDto = userService.getUserList(pageRequestDto);
+
+        return ResponseEntity.ok(resultDto);
     }
 }

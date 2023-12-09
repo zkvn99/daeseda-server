@@ -1,11 +1,13 @@
 package laundry.daeseda.dto.page;
 
 import lombok.Builder;
+import lombok.Getter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 @Builder
+@Getter
 public class PageRequestDto {
 
     private int page; // 요청 페이지

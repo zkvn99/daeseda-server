@@ -2,6 +2,8 @@ package laundry.daeseda.service.user;
 
 import laundry.daeseda.controller.BoardController;
 import laundry.daeseda.dto.address.AddressDto;
+import laundry.daeseda.dto.page.PageRequestDto;
+import laundry.daeseda.dto.page.PageResultDto;
 import laundry.daeseda.dto.user.EmailDto;
 import laundry.daeseda.dto.user.UserDto;
 import laundry.daeseda.dto.user.UserUpdateDto;
@@ -27,6 +29,9 @@ import laundry.daeseda.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -142,19 +148,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getUserList() {
-        List<UserEntity> userEntityList = userRepository.findAll();
-        List<UserDto> userDtoList = new ArrayList<>();
-        for(UserEntity user : userEntityList) {
-            UserDto userDto = UserDto.builder()
-                    .userEmail(user.getUserEmail())
-                    .userNickname(user.getUserNickname())
-                    .userName(user.getUserName())
-                    .userPhone(user.getUserPhone())
-                    .build();
-            userDtoList.add(userDto);
-        }
-        return userDtoList;
+    public PageResultDto<UserDto, Object[]> getUserList(PageRequestDto pageRequestDto) {
+        Page<Object[]> result = userRepository.searchUserPage(
+                pageRequestDto.getType(),
+                pageRequestDto.getKeyword(),
+                pageRequestDto.getPageable(Sort.by("userName").descending()));
+
+        Function<Object[], UserDto> fn = (entity -> {
+            UserEntity user = (UserEntity) entity[0];
+            UserDto userDto = UserDto.from(user);
+            return userDto;
+        });
+        return new PageResultDto<>(result, fn, 5);
     }
 
     @Override
